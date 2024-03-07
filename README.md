@@ -142,7 +142,15 @@ This reduced the total number of records to 503k which all represent homes in th
     d. Right of way - A long narrow parcel of land.
     e. Rectangular
     ```
-
+- `homestead_exemption` - This was a numerical column that simply represented the taxable portion of a property's assessed that I converted into binary representation (where it represents a property's taxable portion has been reduced or not). I had done this because I found that the correlation of this number was 0.13 and reducing the numerical representation to a simple binary had made more sense as it was an application process where a property owner would either be able to reduce or not reduce their property's taxable valuation. Most of the values were either 0 or 80,000, so I felt it was appropriate to conform. The correlation did drop but it was neglible drop of about -0.01.
+- `zoning` - This was a categorical column with many nominal features that represents what types of buildings can exist within a certain region within Philadelphia. There were 35 different zoning categories, and as such I had decided to binary encode this column in order to retain the information as sparsely as possible. (Created 6 columns, instead of 35). This allows me to not show priority to any specific zoning category, while retaining the data. The Binary Encoding representation is in the following order (for each element in the index, it corresponds from 1-36 in binary bits):
+    ```
+    ['RSA5' 'RSA3' 'RM1' 'RMX2' 'RSD3' 'RM4' 'CA1' 'RSA2' 'RSD1' 'CMX4' 'CMX5'
+    'CMX2' 'RM2' 'RSA4' 'RSA1' 'ICMX' 'RM3' 'RMX3' 'RTA1' 'RMX1' 'I3' 'IRMX'
+    'CMX1' 'CMX3' 'RSD2' 'I2' 'RSA6' 'I1' 'CMX2.5' 'SPINS' 'SPPOA'
+    'RSD1|RSD3' 'ICMX|SPPOA' 'CA2' 'RSA5|RSA5']
+    ```
+- `zip_code` - This was a numerical 5-digit column that had a nominal representation as it represented a specific location within Philadelphia. I had tested the correlation prior to scaling and there was a small positive 0.07 correlation, and so I wanted to retain this information, as I know that certain regions within Philadelphia are known to be expensive and I wanted to draw out that relation within my model, so as such, I had target encoded this variable tied to the market_value.
 ### Filter Rows based on specific column values
 - `building_code_description` - Removed records that were vacant land properties misfiled under single family homes by filtering and dropping the columns
 - `sale_price` - Filter records that sold for a price above $1 as these were entered as placeholder values
