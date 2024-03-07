@@ -106,7 +106,7 @@ This reduced the total number of records to 503k which all represent homes in th
     J. Unknown Size - Unfinished
     K. Unknown - Unknown (NEW DEFINITION CREATED)
     ```
-- `topography` - Based on the metadata provided the philadelphia, most lots are on the street level by average, and so I'm imputing it with F.
+- `topography` - Based on the metadata provided from OPA, in philadelphia, most lots are on the street level by average, and so I'm imputing it with F.
     ```
     Most lots in the City are at street level. This is a site that would be at street or sidewalk
     grade or level with a slight contour to permit drainage away from the property. This is
@@ -127,6 +127,20 @@ This reduced the total number of records to 503k which all represent homes in th
     e. Relates to anything not identified here that may be observed that may have some effect
     on value. Indicate what it is in the comments section of this form.
     f. Level.
+    ```
+- `parcel_shape` - Based on the metadata provided from the OPA, there doesn't seem to be any sort of preference for the shape of the property, and as such I do not want to influence the transformation by assigning it numerical values as that gives implicit priority. As such, I had one hot encoded this column sparsely.
+    ```
+	Regular-rectangular is typical. Most properties in the City of Philadelphia are laid out on
+    streets in a grid pattern and the lots are rectangular in shape. A square lot would also be
+    regular. In most cases it will be typical and coded “E”.
+    a. Irregular - This would be a lot other than a square, rectangular or a triangle. It is not a
+    grossly irregular shape.
+    b. Grossly Irregular - This relates to a shape that may include curves, narrow portions, long
+    access driveways or shapes where there are possibly portions of the site that cannot be
+    utilized because of the physical shape.
+    c. Triangular - This is a parcel of land that is triangular in shape.
+    d. Right of way - A long narrow parcel of land.
+    e. Rectangular
     ```
 
 ### Filter Rows based on specific column values
@@ -205,7 +219,7 @@ Finally, we have a cleaned dataset with categorical, numerical values that total
     G. Radiant
     H. Undetermined / None
     ```
-- `interior_condition`: Similar to rest, Ordinal Encoding after removing values without any clear definitions from the OPA's metadata, encoded in the order as seen below but 0's and 2's were removed.
+- `interior_condition`: Similar to rest, Ordinal Encoding after removing values without any clear definitions from the OPA's metadata, encoded in the order as seen below but 0's and 1's and 8's were removed as they either don't have a clear definition or are non-applicable.
     ```
     This could indicate the overall condition of the interior.
     0. Not Applicable.
@@ -228,5 +242,52 @@ Finally, we have a cleaned dataset with categorical, numerical values that total
     of past abuse by vandals such as graffiti, missing railings, deteriorated wood and
     metal, etc. Scorch marks and/or fire and water damage to exterior brick, siding,
     bays, etc. Broken windows with blackened and charred interior.
+    ```
+- `view_type`: This was Sparsely One Hot Encoded as I did not want to influence the value of a property by implicitly giving it a value based on its category, as it appears this value is supposed to be understood as a nominal value.
+    ```
+    View relates to the view from the subject property windows, deck, porch or balcony. In
+    most cases it will be typical, and coded “I”.
+    I. Typical / Other.
+    0. Not Applicable.
+    a. Cityscape / Skyline - relates more to a view from mid to high-rise condominium
+    units. It would be a view that may be aesthetically pleasing to the eye by observing
+    various height buildings, rooftops and other manmade improvements against the
+    blue sky and sun.
+
+    b. Flowing Water - relates to a view of either the Delaware River or Schuylkill
+    River. It could also include a view of Wissahickon Creek, Pennypack Creek, and
+    possibly Frankford Creek, etc.
+
+    c. Park/Green Area relates to a property located directly across from a park or green area.
+    In the case of a dwelling, this would be directly across the street. In the case of
+    residential condominium units, these would be units that because of their location in the
+    building have a view of a park. This could include Rittenhouse Square, Logan Circle,
+    Franklin Square, or Washington Square etc. It could include Tinicum Wild Life Pre-
+    serve, Schuylkill Valley Nature Center. Fitler Square, or any local park or green area.
+    d. Commercial
+    e. Industrial
+    h. Edifice / Landmark
+    ```
+- `topography` - This was one-hot encoded as I did not want to categorize this with a numerical value in order to avoid implicit priority, and these values were written in the metadata as a nominal attribute / description. There was no weight really associated with the topography classification from OPA, as shown below.
+    ```
+    Most lots in the City are at street level. This is a site that would be at street or sidewalk
+    grade or level with a slight contour to permit drainage away from the property. This is
+    typical and should be indicated as „F‟ or level. Use one of the following that is most
+    appropriate.
+    a. Above Street Level - This would be topography where you would have to walk up over
+    two (2) flights of steps from the front and rear or is hilly or slopes upward sharply.
+    This could pose a problem for development.
+    b. Below Street Level - This relates to topography that is below the level of the sidewalk
+    and street. You have to go down steps or an embankment. This could pose a problem
+    for drainage and development.
+    c. Flood Plain - This is a site that falls within an identified Zone A flood hazard zone. This
+    is normally found in close proximity to flowing water or a high water table. Typically it
+    can be found in South and S.W. Phila., and along the rivers, streams, creeks, etc. It
+    could include wetlands or land under water.
+    d. Rocky - This relates to areas of the City that have very rocky soil or sub-soil conditions that could have an adverse effect on site grading, construction or installation of sewers
+    and water mains. This is normally found in Philly areas, such as N.W. Philadelphia.
+    e. Relates to anything not identified here that may be observed that may have some effect
+    on value. Indicate what it is in the comments section of this form.
+    f. Level.
     ```
 # Feature Engineering
