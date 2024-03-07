@@ -39,7 +39,7 @@ utility
 ### Drop columns with high cardinality
 There were many columns that were simply identifiers for each entry within the database, and we want our model to find patterns within the data, so as such columns with high cardinality (many distinct values) were identified and removed. At this point of data-cleaning, there were about 500k records. As such, I set a threshold that identifies columns with high cardinality or in other words if a column had 20% unique values (116k), then I would simply drop it.
 
-**NOTE:** I had preserved `lat`,`lng` as I wanted to use the location of each home in hopes of finding a pattern between their location and its price.
+**NOTE:** I had dropped lat and lng because they were too precise of a measurement and wanted to rely on zip code instead as it represents a localized region within philadelphia quite well.
 
 These were the columns that were removed from this operation:
 ```
@@ -78,6 +78,11 @@ This reduced the total number of records to 503k which all represent homes in th
 - `off_street_open` - Metadata did not provide a clear definition regarding this attribute so I found it hard to use as a feature in relation to the target variable.
 - `state_code` - It was a redundant datafiled that had 100% PA values at this point of the cleanup, and we only had houses within the philadelphia region
 - `house_number` - This number has no meaningful correlation to market_value and is generated at random within the local neighborhood of each property and each street that the property itself is located at.
+- `general_construction` - Too many missing values and unclear definitions for what each unique value in this feature represents. Hard to determine an average in order to impute, so I dropped it.
+- `quality_grade` - This is also a feature with unclear definitions that has both letters and numerical representation that was not clarified in the metadata. The data is too messy in order to determine any valuable correlations to the target variable.
+- `exempt_land` - The correlation coefficient between market_value and exempt land was 0.06 representing a weak correlation and so this column got removed in the idea of dimensionality reduction.
+- `sale_price` - After manually, analyzing the first quartile and the outliers of this data manually, I realized that there are too many values here with crazy extremes, and that this column would have to be dropped.
+- `sale_date` - After removing sales after the end of 2023, I decided to drop this column in order to avoid recency bias within the model.
 
 ### Imputations
 - `type_heater` - Imputed the Missing Values to H, as this letter represents Undetermined for the type of heating system a property has.
@@ -101,7 +106,6 @@ This reduced the total number of records to 503k which all represent homes in th
     J. Unknown Size - Unfinished
     K. Unknown - Unknown (NEW DEFINITION CREATED)
     ```
-- `quality_grade` - Imputed this value to C, as this represents the average grade for properties within Philadelphia (identified via Data Wrangler).
 - `topography` - Based on the metadata provided the philadelphia, most lots are on the street level by average, and so I'm imputing it with F.
     ```
     Most lots in the City are at street level. This is a site that would be at street or sidewalk
@@ -124,9 +128,47 @@ This reduced the total number of records to 503k which all represent homes in th
     on value. Indicate what it is in the comments section of this form.
     f. Level.
     ```
+
 ### Filter Rows based on specific column values
 - `building_code_description` - Removed records that were vacant land properties misfiled under single family homes by filtering and dropping the columns
 - `sale_price` - Filter records that sold for a price above $1 as these were entered as placeholder values
-- `exempt_building` - This represents if the OPA had exempt this building from certification, and that means if there's a value in this column for a record, that it was exempt, and as such I dropped all the records that were exempt as this means they were not properly assessed in terms of their features.
-- `exempt_land` - This represents if the OPA had exempt this land from certification, and that means if there's a value in this column for a record, that it was exempt, and as such I dropped all the records that were exempt as this means they were not properly assessed in terms of their features.
+- `sale_date` - I decided to make the cut-off upto the end of December 2023, as some of these properties listed within the dataset haven't even been fully constructed and so its' market value also tends to have many placeholders.
+- `basements` - I removed all values that were not part of the metadata's basement indexing. There were some extraneous values such as 1,2,3,4 that did not have a description.
+
+### Filter Rows due to missing values
+The following rows at this point of data preprocessing have missing values across these features.
+![Missing Values By Column shown in graphic](report_assets/MissingValsByCol.png.png)
+
+For all of these missing values by column, I've decided to drop them instead of going for an imputation as they highly depend on the geographical region, and also rely on the market_value in order to inference properly, but since we are trying to infer market_value, I did not want to influence the dataset creating an influenced dataset.
+
+Moreover, we have 300k records at this point in time, and so I beleive in order to retain the purity of the dataset, it is best if we drop the 13k rows of missing values all together instead of influencing the training data inapproriately.
+
+## Conclusion to Data Preprocessing (Clean Missing Values + Imputation)
+Finally, we have a cleaned dataset with categorical, numerical values that total about 330k records. Next, we have to encode certain columns appropriately based on their categorical values (ordinal vs. nominal).
+
+### Categorical Transformations
+
+- `basements`: Using the Ordinal Encoder, I transformed the ordinal values: `['0', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']`
+- `exterior_conditions`: Similar to basements, except these labels are numerical, however they each represent order as the higher the number is, than the better the condition. `[7, 6, 5, 4, 3, 2, 1, 0]`. At this point, after filtering, I did not have any values beyond 7.
+    ```
+    Relates to how the exterior appears based on observation.
+    0. Not Applicable
+    1. NEWER CONSTRUCTION – Noticeably newer construction then surrounding properties in the GMA.
+
+    2. REHABILITATED – Property is superior to most other properties on the block.
+    Usually the following exterior improvements can be observed:
+    New full or partial brick or other material front
+    New windows, doors
+    New concrete sidewalks, steps, porch, patio or decks
+    If you are not certain, use ABOVE AVERAGE.
+    3. ABOVE AVERAGE – A well-maintained property where the owner does preventive
+    maintenance on an on going basis and reacts to any deferred maintenance as it starts
+    to occur. Exterior physical condition is better than average and less than
+    4. REHABILITATED.
+    5. AVERAGE – This is the typical and most common physical condition observed at the exterior of most properties on the subject block. No significant concrete work, pointing, painting, carpentry or work to trim exterior walls, doors, windows or bay is required. No obvious defects. Majority of properties in the block or GMA are in this condition.
+    6. BELOW AVERAGE – Excessive deferred maintenance, wear and tear, abuse, and/or minor vandalism, or unrepaired minor fire damage. These items are starting to add up and take their toll.
+    7. VACANT – No occupancy. FHA, VA, FNMA signs may be on the property. Property has been secured with fresh plywood over doors and windows.
+    8. SEALED – Doors and windows have been covered over by plywood, tin, concrete block or stucco. No interior access.
+    9. STRUCTURALLY COMPROMISED, OPEN TO THE WEATHER - Some or no windows, no door or door open, evidence of past abuse by vandals such as graffiti, missing railings, deteriorated wood and metal, etc. Scorch marks and/or fire and water damage to exterior brick, siding, bays, etc. Broken windows with blackened and charred interior.
+    ```
 # Feature Engineering
