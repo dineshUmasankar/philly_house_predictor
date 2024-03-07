@@ -134,10 +134,34 @@ This reduced the total number of records to 503k which all represent homes in th
 - `sale_price` - Filter records that sold for a price above $1 as these were entered as placeholder values
 - `sale_date` - I decided to make the cut-off upto the end of December 2023, as some of these properties listed within the dataset haven't even been fully constructed and so its' market value also tends to have many placeholders.
 - `basements` - I removed all values that were not part of the metadata's basement indexing. There were some extraneous values such as 1,2,3,4 that did not have a description.
+- `interior_condition` - Removed all values that were not part of the metadata for interior condition, such as 8. I had also dropped 0 from the valid definition criteria as I did not want to include not applicable. As this the definition for interior condition:
+    ```
+    This could indicate the overall condition of the interior.
+    0. Not Applicable.
+    2. New / Rehabbed – Noticeably new construction then surrounding properties
+    in the GMA. Property is superior to most other properties on the block. Usually
+    the following exterior improvements can be observed.
+
+    3. Above Average - would indicate that some work had been done or the level of
+    maintenance has been beyond what is typical for the area. The interior would show
+    very well and be in move in condition.
+    4. Average – would be typical.
+    5. Below Average – would be the opposite. It could appear that maintenance has
+    been let go and things normally were not repaired or replace on a regular basis.
+
+    6. Vacant – No occupancy. FHA, VA, FNMA signs may be on the property.
+    Property has been secured with fresh plywood over doors and windows.
+    7. Sealed / Structurally Compromised, Open to the Weather –
+    Doors and windows have been covered over by plywood, tin, concrete block or
+    stucco. No interior access. Some or no windows, no door or door open, evidence
+    of past abuse by vandals such as graffiti, missing railings, deteriorated wood and
+    metal, etc. Scorch marks and/or fire and water damage to exterior brick, siding,
+    bays, etc. Broken windows with blackened and charred interior.
+    ```
 
 ### Filter Rows due to missing values
 The following rows at this point of data preprocessing have missing values across these features.
-![Missing Values By Column shown in graphic](report_assets/MissingValsByCol.png.png)
+![Missing Values By Column shown in graphic](report_assets/MissingValsByCol.png)
 
 For all of these missing values by column, I've decided to drop them instead of going for an imputation as they highly depend on the geographical region, and also rely on the market_value in order to inference properly, but since we are trying to infer market_value, I did not want to influence the dataset creating an influenced dataset.
 
@@ -154,7 +178,6 @@ Finally, we have a cleaned dataset with categorical, numerical values that total
     Relates to how the exterior appears based on observation.
     0. Not Applicable
     1. NEWER CONSTRUCTION – Noticeably newer construction then surrounding properties in the GMA.
-
     2. REHABILITATED – Property is superior to most other properties on the block.
     Usually the following exterior improvements can be observed:
     New full or partial brick or other material front
@@ -170,5 +193,40 @@ Finally, we have a cleaned dataset with categorical, numerical values that total
     7. VACANT – No occupancy. FHA, VA, FNMA signs may be on the property. Property has been secured with fresh plywood over doors and windows.
     8. SEALED – Doors and windows have been covered over by plywood, tin, concrete block or stucco. No interior access.
     9. STRUCTURALLY COMPROMISED, OPEN TO THE WEATHER - Some or no windows, no door or door open, evidence of past abuse by vandals such as graffiti, missing railings, deteriorated wood and metal, etc. Scorch marks and/or fire and water damage to exterior brick, siding, bays, etc. Broken windows with blackened and charred interior.
+    ```
+- `type_heater`: Similar to the rest, ordinally encoded based on the following order as described by the OPA:
+    ```
+    Type of heater or heating system.
+    A. Hot air (ducts)
+    B. Hot water (radiators or baseboards)
+    C. Electric baseboard
+    D. Heat pump (outside unit).
+    E. Other
+    G. Radiant
+    H. Undetermined / None
+    ```
+- `interior_condition`: Similar to rest, Ordinal Encoding after removing values without any clear definitions from the OPA's metadata, encoded in the order as seen below but 0's and 2's were removed.
+    ```
+    This could indicate the overall condition of the interior.
+    0. Not Applicable.
+    2. New / Rehabbed – Noticeably new construction then surrounding properties
+    in the GMA. Property is superior to most other properties on the block. Usually
+    the following exterior improvements can be observed.
+
+    3. Above Average - would indicate that some work had been done or the level of
+    maintenance has been beyond what is typical for the area. The interior would show
+    very well and be in move in condition.
+    4. Average – would be typical.
+    5. Below Average – would be the opposite. It could appear that maintenance has
+    been let go and things normally were not repaired or replace on a regular basis.
+
+    6. Vacant – No occupancy. FHA, VA, FNMA signs may be on the property.
+    Property has been secured with fresh plywood over doors and windows.
+    7. Sealed / Structurally Compromised, Open to the Weather –
+    Doors and windows have been covered over by plywood, tin, concrete block or
+    stucco. No interior access. Some or no windows, no door or door open, evidence
+    of past abuse by vandals such as graffiti, missing railings, deteriorated wood and
+    metal, etc. Scorch marks and/or fire and water damage to exterior brick, siding,
+    bays, etc. Broken windows with blackened and charred interior.
     ```
 # Feature Engineering
