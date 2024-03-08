@@ -285,7 +285,43 @@ df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'total_area')
 df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'total_livable_area')
 df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'taxable_building')
 df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'taxable_land')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'exempt_building')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'market_value', percentiles=[5,99])
 df_remove_outliers.to_csv('fil.csv')
 df_remove_outliers
+
+# %%
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+columns_to_scale = ['fireplaces', 'number_of_bathrooms', 'number_of_bedrooms', 'number_stories',
+           'basements_encoded', 'exterior_encoded', 'interior_encoded',
+           'type_heater_encoded', 'homestead_exemption_encoded', 'exempt_building_encoded',
+           'depth_capped', 'frontage_capped', 'garage_spaces_capped',
+           'total_area_capped', 'total_livable_area_capped',
+           'taxable_building_capped', 'taxable_land_capped',
+           'exempt_building_capped']
+
+# Identify columns not to scale
+columns_not_to_scale = [col for col in df_remove_outliers.columns if col not in columns_to_scale]
+
+scaled_cols = columns_to_scale + columns_not_to_scale
+
+# Create a ColumnTransformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('scaled_features', StandardScaler(), columns_to_scale),
+    ],
+    remainder='passthrough'  # Keep any columns not specified in transformers
+)
+
+# Create a pipeline with the preprocessor and any other steps (e.g., model)
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+])
+
+scaled_dataset = pd.DataFrame(pipeline.fit_transform(df_remove_outliers), columns=scaled_cols)
+scaled_dataset.corrwith(scaled_dataset['market_value_capped']).to_csv('all_corrs.csv', header=True)
 
 
