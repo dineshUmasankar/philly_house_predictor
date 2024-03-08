@@ -303,6 +303,7 @@ Moreover, we have 300k records at this point in time, and so I beleive in order 
 
 ### Removing Outliers from the numerical columns
 There are many attributes with very large skew, such as the example shown below for the depth column.
+
 ![Depth Before Removing Outliers](report_assets/depth_high_skew.png)
 
 There were very few samples causing such massive skews and outliers, but I wanted to still encode the fact that these outliers were still within the dataset.
@@ -311,6 +312,7 @@ Afterwards, I had applied IQR onto the capped version of this column. This techn
 any columns for which I noticed had high skews.
 
 The effects of this function on the depth function can be seen below. As you can see, the outliers were removed, but were still retained by imputing them to the upperbounded value.
+
 ![Depth After Winsorsizing](report_assets/depth_capped.png)
 
 The following list of columns were winsorized:
@@ -326,6 +328,7 @@ exempt_building
 ```
 
 Market_Value is our target column, but it has quite a wide spread as shown below, but I wanted to retain as much of this data as possible, but not have the absurd outliers as shown below. As such, I used the same winsorized generic function but targeted a wider percentile: [5, 99]
+
 ![Market Value Spread/Skew](report_assets/market_value_spread.png)
 
 # Feature Engineering
