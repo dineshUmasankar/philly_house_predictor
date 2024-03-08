@@ -367,6 +367,16 @@ taxable_building_capped      0.752963
 taxable_land_capped          0.972209
 ```
 
-However, I will also apply PCA on the entire dataset and also build models up to n_components.
-
 ![Strong Correlations](report_assets/strong_correlations.png)
+
+The top 10 features shown above are saved to a dataset called: `high_correlations.csv`.
+
+Moreover, I will also apply PCA on the entire scaled dataset up 10 principal components, in order to deem if we can build better models with 10 principal components, which will be saved as `pca_10component.csv`.
+
+When applying PCA, these were the explained variance ratios when applied up to 10 principal components, we were only able to grab 0.59 of the variance across the whole dataset with only 10 principal components.
+```
+[0.14330905 0.10408661 0.09189723 0.0580442  0.04234404 0.03984931
+ 0.03544096 0.02981967 0.02824006 0.02141405]
+
+ Sum: 0.5944680612855746
+```
