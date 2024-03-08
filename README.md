@@ -384,3 +384,7 @@ When applying PCA, these were the explained variance ratios when applied up to 1
 # Construction of Test Dataset
 
 I had done the general rule of 80-20 train/test split using the random state of 42, as we have done in class in order to generate the test vs train dataset. Originally, I had thought about stratifying or k-folding, but there are too many individual classes with their own spreads and variances, that it would be best to cover them all through just pure randomization. The dataset was constructed in my `model_development` folder.
+
+# Model Development
+
+First, I had went about it naively and applied all 10 principal components to a model using the aforementioned test_train_split and all of the features of the high correlation model, in order to deem what model performed best.
