@@ -1,5 +1,8 @@
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from category_encoders import BinaryEncoder
+from category_encoders import TargetEncoder
 
 def drop_high_missing_percent_columns(df):
     # Drop columns with more than 25% missing values
@@ -133,7 +136,99 @@ def filter_specific(df):
     # Constraining Basements to the following valid indexes and transform to ordinal encoding
     valid_basement = ['0', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
     df = df[df['basements'].isin(valid_basement)]
+
+    # Constraining type_heater to valid definitions from metadata
+    valid_type_heater = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    df = df[df['type_heater'].isin(valid_type_heater)]
+
+    # Constraining view_type to valid definitions from metadata
+    valid_view_types = ['I', 'H', 'D', 'A', 'C', '0', 'E', 'B']
+    df = df[df['view_type'].isin(valid_view_types)]
+
+    # Constraining topography to valid definitions from metadata
+    valid_topography_types = ['A', 'B', 'C', 'D', 'E', 'F']
+    df = df[df['topography'].isin(valid_topography_types)]
+    
+    # Constraining parcel_shape to valid definitions from metadata
+    valid_parcel_shape = ['A', 'B', 'C', 'D', 'E']
+    df = df[df['parcel_shape'].isin(valid_parcel_shape)]
+    
+    
     return df
 
+
+
 df_filter_specific = filter_specific(df_filter_saledate.copy())
-df_filter_specific.to_csv('fil.csv')
+
+#### ENCODING PROCESS
+
+df_encode = df_filter_specific.copy()
+# Basement Ordinal Encoding
+valid_basements = ['0', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
+basements_encoder = OrdinalEncoder(categories=[valid_basements])
+df_encode['basements_encoded'] = basements_encoder.fit_transform(df_encode[['basements']])
+df_encode = df_encode.drop(columns=['basements'])
+
+# Exterior Condition Ordinal Encoding
+valid_exterior_conditions = sorted(df_encode['exterior_condition'].unique().astype(int))
+exterior_encoder = OrdinalEncoder(categories=[valid_exterior_conditions])
+df_encode['exterior_encoded'] = exterior_encoder.fit_transform(df_encode[['exterior_condition']])
+df_encode = df_encode.drop(columns=['exterior_condition'])
+
+# Interior Condition Ordinal Encoding
+valid_interior_conditions = sorted(df_encode['interior_condition'].unique().astype(int))
+interior_encoder = OrdinalEncoder(categories=[valid_interior_conditions])
+df_encode['interior_encoded'] = interior_encoder.fit_transform(df_encode[['interior_condition']])
+# Remove records with invalid interior condition that do not have any definitions within metadata OPA.
+df_encode = df_encode[df_encode['interior_encoded'] != 0]
+df_encode = df_encode[df_encode['interior_encoded'] != 1]
+df_encode = df_encode[df_encode['interior_encoded'] != 8]
+df_encode = df_encode.drop(columns=['interior_condition'])
+
+# Type Heater Ordinal Encoding
+valid_type_heater = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+heater_encoder = OrdinalEncoder(categories=[valid_type_heater])
+df_encode['type_heater_encoded'] = heater_encoder.fit_transform(df_encode[['type_heater']])
+df_encode = df_encode.drop(columns=['type_heater'])
+
+# View Type One Hot Encode Encoding
+view_encoder = OneHotEncoder(drop=None, sparse_output=False)
+view_encoder.fit(df_encode[['view_type']])
+df_encode[['view_type_I', 'view_type_H', 'view_type_D', 'view_type_A', 'view_type_C', 'view_type_0', 'view_type_E', 'view_type_B']] = view_encoder.transform(df_encode[['view_type']])
+
+# Topograhy One Hot Encode (as there is no order and we don't want to influence priority)
+topography_encoder = OneHotEncoder(drop=None, sparse_output=False)
+topography_encoder.fit(df_encode[['topography']])
+df_encode[['topography_A', 'topography_B', 'topography_C', 'topography_D', 'topography_E', 'topography_F']] = topography_encoder.transform(df_encode[['topography']])
+
+# Parcel Shape One Hot Encode (as there is no order and we don't want to influence priority)
+parcel_shape_encoder = OneHotEncoder(drop=None, sparse_output=False)
+parcel_shape_encoder.fit(df_encode[['parcel_shape']])
+df_encode[['parcel_shape_A', 'parcel_shape_B', 'parcel_shape_C', 'parcel_shape_D', 'parcel_shape_E']] = parcel_shape_encoder.transform(df_encode[['parcel_shape']])
+
+# Homestead Exemption
+print(df_encode[['homestead_exemption', 'market_value']].corr())
+df_encode['homestead_exemption_encoded'] = df_encode['homestead_exemption'].clip(0, 1)
+print(df_encode[['homestead_exemption_encoded', 'market_value']].corr())
+df_encode.drop(columns=['homestead_exemption'])
+
+
+# Zoning (35 different zoning, and nominal attribute, we are going to binary encode this column)
+# Binary Encoded in the following order: ['RSA5' 'RSA3' 'RM1' 'RMX2' 'RSD3' 'RM4' 'CA1' 'RSA2' 'RSD1' 'CMX4' 'CMX5'
+#  'CMX2' 'RM2' 'RSA4' 'RSA1' 'ICMX' 'RM3' 'RMX3' 'RTA1' 'RMX1' 'I3' 'IRMX'
+#  'CMX1' 'CMX3' 'RSD2' 'I2' 'RSA6' 'I1' 'CMX2.5' 'SPINS' 'SPPOA'
+#  'RSD1|RSD3' 'ICMX|SPPOA' 'CA2' 'RSA5|RSA5']
+zoning_encoder = BinaryEncoder(cols=['zoning'])
+df_encode = zoning_encoder.fit_transform(df_encode)
+
+# Zipcode Target Encoding
+zipcode_encoder = TargetEncoder(cols=['zip_code'])
+df_encode = zipcode_encoder.fit_transform(df_encode['zip_code'], df_encode['market_value'])
+
+
+# Street Name
+
+# Street Designation
+
+
+# df_encode.to_csv('fil.csv')
