@@ -346,3 +346,10 @@ As you have also noticed, some variables were transformed within the last sectio
 ### Feature Selection
 I computed the correlation with the `market_value_capped` variable in order to deem features with the most correlation, so we could use these features in our models.
 All of the correlations between the columns and `market_value_capped` is stored in the file: `all_corrs.csv`.
+
+As you can see here of all the strong positive correlations from select features after data pre-processing.
+I will be selecting features with strong than 0.2 positive correlation to use within my models.
+
+However, I will also apply PCA on the entire dataset and also build models up to n_components.
+
+![Strong Correlations](report_assets/strong_correlations.png)
