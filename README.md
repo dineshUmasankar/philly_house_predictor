@@ -336,3 +336,13 @@ After applying the winsorsizing function with the larger percentile, you can see
 ![Market Value Custom Winsorsized](report_assets/market_value_capped.png)
 
 # Feature Engineering
+
+At this point, our data has been preprocessed and all columns have been converted into numerical columns, but they require scaling in order to ensure no one feature dwarfs its own representation when being built into a machine learning model to predict the market_value.
+
+For columns that were binary or binary encoded or one-hot encoded, I decided not to scale those columns. The columns that have numerical values that are not between 0 and 1, I had applied the standard scaler as the skews have been forced into as close as possible into a normal distribution where the highest skew is 0.5 (absolute), which I believe is low enough to still provide valuable information after scaling without dissoluting the data improperly.
+
+As you have also noticed, some variables were transformed within the last section as well such as homestead_exemption based on its metadata defintion and new variables were introduced in those sections as well (basements). As such, this section primarily involves applying standard scaler. Some missing values were also imputed with their appropriate definition (such as type_heater with H).
+
+### Feature Selection
+I computed the correlation with the `market_value_capped` variable in order to deem features with the most correlation, so we could use these features in our models.
+All of the correlations between the columns and `market_value_capped` is stored in the file: `all_corrs.csv`.
