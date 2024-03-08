@@ -390,3 +390,15 @@ I had done the general rule of 80-20 train/test split using the random state of 
 First, I had went about it naively and applied all 10 principal components to a model using the aforementioned test_train_split and all of the features of the high correlation model, in order to deem what model performed best.
 
 I tested my naive approach across the following models: LinearRegression, DecisionTreeRegressor, RandomForestRegressor, GradientBoostingRegressor, XGBoostRegressor.
+I had used all of the features between the PCA dataset (all principal components) and all features from the high correlation dataset.
+
+For my Naive Approach, you can see the model's performance when using the score function across all the models with the PCA dataset and High Correlation dataset.
+The score function was set to output as $R^2$. Higher bars represent better performance when it comes to the model's scores.
+
+![Naive Approach to using all features in both datasets and scoring them with multiple regression models](report_assets/NaiveModels_Score.png)
+
+Furthermore, I had also evaluated the RMSE across both datasets in order to see which dataset had generally produced more accurate predictions. In this graph, lower bars represent more accurate predictions, as it means there was less error.
+
+![Naive Approach to using all features in both datasets and calculating RMSE with multiple regression models](report_assets/NaiveModels_RMSE.png)
+
+Table showcasing RMSE from Naive Approach on various regression models.
