@@ -388,3 +388,5 @@ I had done the general rule of 80-20 train/test split using the random state of 
 # Model Development
 
 First, I had went about it naively and applied all 10 principal components to a model using the aforementioned test_train_split and all of the features of the high correlation model, in order to deem what model performed best.
+
+I tested my naive approach across the following models: LinearRegression, DecisionTreeRegressor, RandomForestRegressor, GradientBoostingRegressor, XGBoostRegressor.
