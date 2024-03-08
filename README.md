@@ -322,6 +322,10 @@ total_area
 total_livable_area
 taxable_building
 taxable_land
+exempt_building
 ```
+
+Market_Value is our target column, but it has quite a wide spread as shown below, but I wanted to retain as much of this data as possible, but not have the absurd outliers as shown below. As such, I used the same winsorized generic function but targeted a wider percentile: [5, 99]
+![Market Value Spread/Skew](report_assets/market_value_spread.png)
 
 # Feature Engineering

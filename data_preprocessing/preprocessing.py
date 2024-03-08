@@ -1,8 +1,5 @@
+# %%
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder
-from sklearn.preprocessing import OneHotEncoder
-from category_encoders import BinaryEncoder
-from category_encoders import TargetEncoder
 
 def drop_high_missing_percent_columns(df):
     # Drop columns with more than 25% missing values
@@ -160,7 +157,10 @@ def filter_specific(df):
 
 df_filter_specific = filter_specific(df_filter_saledate.copy())
 
-#### ENCODING PROCESS
+# %%
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from category_encoders import BinaryEncoder
 
 df_encode = df_filter_specific.copy()
 # Basement Ordinal Encoding
@@ -195,23 +195,25 @@ df_encode = df_encode.drop(columns=['type_heater'])
 view_encoder = OneHotEncoder(drop=None, sparse_output=False)
 view_encoder.fit(df_encode[['view_type']])
 df_encode[['view_type_I', 'view_type_H', 'view_type_D', 'view_type_A', 'view_type_C', 'view_type_0', 'view_type_E', 'view_type_B']] = view_encoder.transform(df_encode[['view_type']])
+df_encode = df_encode.drop(columns=['view_type'])
 
 # Topograhy One Hot Encode (as there is no order and we don't want to influence priority)
 topography_encoder = OneHotEncoder(drop=None, sparse_output=False)
 topography_encoder.fit(df_encode[['topography']])
 df_encode[['topography_A', 'topography_B', 'topography_C', 'topography_D', 'topography_E', 'topography_F']] = topography_encoder.transform(df_encode[['topography']])
+df_encode = df_encode.drop(columns=['topography'])
 
 # Parcel Shape One Hot Encode (as there is no order and we don't want to influence priority)
 parcel_shape_encoder = OneHotEncoder(drop=None, sparse_output=False)
 parcel_shape_encoder.fit(df_encode[['parcel_shape']])
 df_encode[['parcel_shape_A', 'parcel_shape_B', 'parcel_shape_C', 'parcel_shape_D', 'parcel_shape_E']] = parcel_shape_encoder.transform(df_encode[['parcel_shape']])
+df_encode = df_encode.drop(columns=['parcel_shape'])
 
 # Homestead Exemption
 print(df_encode[['homestead_exemption', 'market_value']].corr())
 df_encode['homestead_exemption_encoded'] = df_encode['homestead_exemption'].clip(0, 1)
 print(df_encode[['homestead_exemption_encoded', 'market_value']].corr())
-df_encode.drop(columns=['homestead_exemption'])
-
+df_encode = df_encode.drop(columns=['homestead_exemption'])
 
 # Zoning (35 different zoning, and nominal attribute, we are going to binary encode this column)
 # Binary Encoded in the following order: ['RSA5' 'RSA3' 'RM1' 'RMX2' 'RSD3' 'RM4' 'CA1' 'RSA2' 'RSD1' 'CMX4' 'CMX5'
@@ -221,14 +223,69 @@ df_encode.drop(columns=['homestead_exemption'])
 zoning_encoder = BinaryEncoder(cols=['zoning'])
 df_encode = zoning_encoder.fit_transform(df_encode)
 
-# Zipcode Target Encoding
-zipcode_encoder = TargetEncoder(cols=['zip_code'])
-df_encode = zipcode_encoder.fit_transform(df_encode['zip_code'], df_encode['market_value'])
+# Zipcode Binary Encoding
+zipcode_encoder = BinaryEncoder(cols=['zip_code'])
+df_encode = zipcode_encoder.fit_transform(df_encode)
 
+# Year Built Binary Encoding
+year_built_encoder = BinaryEncoder(cols=['year_built'])
+df_encode = year_built_encoder.fit_transform(df_encode)
+
+# Geographic Ward Binary Encoding
+year_built_encoder = BinaryEncoder(cols=['geographic_ward'])
+df_encode = year_built_encoder.fit_transform(df_encode)
+
+# Census Tract Binary Encoding
+year_built_encoder = BinaryEncoder(cols=['census_tract'])
+df_encode = year_built_encoder.fit_transform(df_encode)
 
 # Street Name
+street_name_encoder = BinaryEncoder(cols=['street_name'])
+df_encode = street_name_encoder.fit_transform(df_encode)
 
 # Street Designation
+street_name_encoder = BinaryEncoder(cols=['street_designation'])
+df_encode = street_name_encoder.fit_transform(df_encode)
+
+# %%
+def remove_outliers_winsorize(df, column_name, percentiles=[5, 95]):
+    # Winsorize outliers (capping them to specific percentiles)
+    capped_column_name = f'{column_name}_capped'
+    df[capped_column_name] = df[column_name].clip(
+        lower=df[column_name].quantile(percentiles[0]/100),
+        upper=df[column_name].quantile(percentiles[1]/100)
+    )
+
+    # Calculate IQR using winsorized data
+    Q1 = df[capped_column_name].quantile(0.25)
+    Q3 = df[capped_column_name].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # Define lower and upper bounds for outliers based on winsorized IQR
+    lower_bound = Q1 - (1.5 * IQR)
+    upper_bound = Q3 + (1.5 * IQR)
+
+    # Filter out outliers using winsorized IQR
+    df_filtered = df[
+        (df[capped_column_name] >= lower_bound) &
+        (df[capped_column_name] <= upper_bound)
+    ]
+
+    # Drop the original column
+    df_filtered.drop(columns=[column_name], inplace=True)
+
+    return df_filtered
+
+# %%
+df_remove_outliers = df_encode.copy()
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'depth')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'frontage')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'garage_spaces')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'total_area')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'total_livable_area')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'taxable_building')
+df_remove_outliers = remove_outliers_winsorize(df_remove_outliers, 'taxable_land')
+df_remove_outliers.to_csv('fil.csv')
+df_remove_outliers
 
 
-# df_encode.to_csv('fil.csv')
