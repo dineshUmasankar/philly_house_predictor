@@ -335,6 +335,8 @@ Market_Value is our target column, but it has quite a wide spread as shown below
 After applying the winsorsizing function with the larger percentile, you can see the distribution much more cleanly now, and it is much more appropriate to scale.
 ![Market Value Custom Winsorsized](report_assets/market_value_capped.png)
 
+Overall, at this point the data has been cleaned and there are no more categorical variables or missing values or any absurd outliers that remain in the data. Some features have also been engineered with additional values to provide some context in regard to their missing values, and some features were imputed with their average value for missing features. The specifics were mentioned above. At the end of this step, there are two files that are created: `filtered.csv` and `scaled.csv`. The first file is after we've filtered all of the missing values out and engineered/imputed some values for features, and scaled is after we've scaled select numerical columns.
+
 # Feature Engineering
 
 At this point, our data has been preprocessed and all columns have been converted into numerical columns, but they require scaling in order to ensure no one feature dwarfs its own representation when being built into a machine learning model to predict the market_value.
@@ -344,11 +346,26 @@ For columns that were binary or binary encoded or one-hot encoded, I decided not
 As you have also noticed, some variables were transformed within the last section as well such as homestead_exemption based on its metadata defintion and new variables were introduced in those sections as well (basements). As such, this section primarily involves applying standard scaler. Some missing values were also imputed with their appropriate definition (such as type_heater with H).
 
 ### Feature Selection
+
 I computed the correlation with the `market_value_capped` variable in order to deem features with the most correlation, so we could use these features in our models.
 All of the correlations between the columns and `market_value_capped` is stored in the file: `all_corrs.csv`.
 
 As you can see here of all the strong positive correlations from select features after data pre-processing.
 I will be selecting features with strong than 0.2 positive correlation to use within my models.
+
+This results with these top 10 features that will be used within my models:
+```
+number_stories               0.200853
+depth_capped                 0.203431
+exempt_building_encoded      0.239870
+total_area_capped            0.298820
+total_livable_area_capped    0.303153
+exempt_building_capped       0.306462
+frontage_capped              0.311095
+zip_code_0                   0.384521
+taxable_building_capped      0.752963
+taxable_land_capped          0.972209
+```
 
 However, I will also apply PCA on the entire dataset and also build models up to n_components.
 
