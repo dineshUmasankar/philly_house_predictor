@@ -142,19 +142,6 @@ This reduced the total number of records to 503k which all represent homes in th
     d. Right of way - A long narrow parcel of land.
     e. Rectangular
     ```
-- `homestead_exemption` - This was a numerical column that simply represented the taxable portion of a property's assessed that I converted into binary representation (where it represents a property's taxable portion has been reduced or not). I had done this because I found that the correlation of this number was 0.13 and reducing the numerical representation to a simple binary had made more sense as it was an application process where a property owner would either be able to reduce or not reduce their property's taxable valuation. Most of the values were either 0 or 80,000, so I felt it was appropriate to conform. The correlation did drop but it was neglible drop of about -0.01.
-- `zoning` - This was a categorical column with many nominal features that represents what types of buildings can exist within a certain region within Philadelphia. There were 35 different zoning categories, and as such I had decided to binary encode this column in order to retain the information as sparsely as possible. (Created 6 columns, instead of 35). This allows me to not show priority to any specific zoning category, while retaining the data. The Binary Encoding representation is in the following order (for each element in the index, it corresponds from 1-36 in binary bits):
-    ```
-    ['RSA5' 'RSA3' 'RM1' 'RMX2' 'RSD3' 'RM4' 'CA1' 'RSA2' 'RSD1' 'CMX4' 'CMX5'
-    'CMX2' 'RM2' 'RSA4' 'RSA1' 'ICMX' 'RM3' 'RMX3' 'RTA1' 'RMX1' 'I3' 'IRMX'
-    'CMX1' 'CMX3' 'RSD2' 'I2' 'RSA6' 'I1' 'CMX2.5' 'SPINS' 'SPPOA'
-    'RSD1|RSD3' 'ICMX|SPPOA' 'CA2' 'RSA5|RSA5']
-    ```
-- `zip_code` - This was a numerical 5-digit column that had a nominal representation as it represented a specific location within Philadelphia. I had tested the correlation prior to scaling and there was a small positive 0.07 correlation, and so I wanted to retain this information, as I know that certain regions within Philadelphia are known to be expensive and I wanted to draw out that relation within my model, so as such, I had binary encoded this feature.
-- `geographic_ward` - This is a number that represents certain regions within philadelphia, but in a more precise manner than zipcode, so these are meant to be treated as labels for specific regions. I did not want to keep these values numerically, as higher number could cause a relationship that was not intended as this attribute is meant to be interpreted as purely nominal, as such this column was binary encoded.
-- `census_tract` - This is a number that also represents certain regions by population density within philadelphia as seen [here](https://www2.census.gov/geo/maps/DC2020/PL20/st42_pa/censustract_maps/c42101_philadelphia/DC20CT_C42101.pdf). I did not want the numerical representation of this number to create false relationships as just because a number is higher doesn't mean there is more population within that specific tract / region. As such, this column was also binary encoded.
-- `street_name` - A nominal attribute, for which I had first converted via the binary encoder this value in order to avoid accidental bias towards a specific street name. There were 2458 values, so OHE would have increased the feature dimensionality by far too much.
-- `street_designation` - Another nominal attribute representing the street suffix of where the property was located. I wanted to find out whether there was any correlation between the street_suffix such as avenue and street and lane and drive in tandem to the market value. Since there were 22 unique values, I had binary encoded this column.
 
 ### Filter Rows based on specific column values
 - `building_code_description` - Removed records that were vacant land properties misfiled under single family homes by filtering and dropping the columns
@@ -194,10 +181,7 @@ For all of these missing values by column, I've decided to drop them instead of 
 
 Moreover, we have 300k records at this point in time, and so I beleive in order to retain the purity of the dataset, it is best if we drop the 13k rows of missing values all together instead of influencing the training data inapproriately.
 
-## Conclusion to Data Preprocessing (Clean Missing Values + Imputation)
-Finally, we have a cleaned dataset with categorical, numerical values that total about 330k records. Next, we have to encode certain columns appropriately based on their categorical values (ordinal vs. nominal).
-
-### Categorical Transformations
+### Feature Transformations (Categorical / Nominal)
 
 - `basements`: Using the Ordinal Encoder, I transformed the ordinal values: `['0', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']`
 - `exterior_conditions`: Similar to basements, except these labels are numerical, however they each represent order as the higher the number is, than the better the condition. `[7, 6, 5, 4, 3, 2, 1, 0]`. At this point, after filtering, I did not have any values beyond 7.
@@ -303,4 +287,41 @@ Finally, we have a cleaned dataset with categorical, numerical values that total
     on value. Indicate what it is in the comments section of this form.
     f. Level.
     ```
+- `homestead_exemption` - This was a numerical column that simply represented the taxable portion of a property's assessed that I converted into binary representation (where it represents a property's taxable portion has been reduced or not). I had done this because I found that the correlation of this number was 0.13 and reducing the numerical representation to a simple binary had made more sense as it was an application process where a property owner would either be able to reduce or not reduce their property's taxable valuation. Most of the values were either 0 or 80,000, so I felt it was appropriate to conform. The correlation did drop but it was neglible drop of about -0.01.
+- `zoning` - This was a categorical column with many nominal features that represents what types of buildings can exist within a certain region within Philadelphia. There were 35 different zoning categories, and as such I had decided to binary encode this column in order to retain the information as sparsely as possible. (Created 6 columns, instead of 35). This allows me to not show priority to any specific zoning category, while retaining the data. The Binary Encoding representation is in the following order (for each element in the index, it corresponds from 1-36 in binary bits creating 6 columns):
+    ```
+    ['RSA5' 'RSA3' 'RM1' 'RMX2' 'RSD3' 'RM4' 'CA1' 'RSA2' 'RSD1' 'CMX4' 'CMX5'
+    'CMX2' 'RM2' 'RSA4' 'RSA1' 'ICMX' 'RM3' 'RMX3' 'RTA1' 'RMX1' 'I3' 'IRMX'
+    'CMX1' 'CMX3' 'RSD2' 'I2' 'RSA6' 'I1' 'CMX2.5' 'SPINS' 'SPPOA'
+    'RSD1|RSD3' 'ICMX|SPPOA' 'CA2' 'RSA5|RSA5']
+    ```
+- `zip_code` - This was a numerical 5-digit column that had a nominal representation as it represented a specific location within Philadelphia. I had tested the correlation prior to scaling and there was a small positive 0.07 correlation, and so I wanted to retain this information, as I know that certain regions within Philadelphia are known to be expensive and I wanted to draw out that relation within my model, so as such, I had binary encoded this feature.
+- `geographic_ward` - This is a number that represents certain regions within philadelphia, but in a more precise manner than zipcode, so these are meant to be treated as labels for specific regions. I did not want to keep these values numerically, as higher number could cause a relationship that was not intended as this attribute is meant to be interpreted as purely nominal, as such this column was binary encoded.
+- `census_tract` - This is a number that also represents certain regions by population density within philadelphia as seen [here](https://www2.census.gov/geo/maps/DC2020/PL20/st42_pa/censustract_maps/c42101_philadelphia/DC20CT_C42101.pdf). I did not want the numerical representation of this number to create false relationships as just because a number is higher doesn't mean there is more population within that specific tract / region. As such, this column was also binary encoded.
+- `street_name` - A nominal attribute, for which I had first converted via the binary encoder this value in order to avoid accidental bias towards a specific street name. There were 2458 values, so OHE would have increased the feature dimensionality by far too much.
+- `street_designation` - Another nominal attribute representing the street suffix of where the property was located. I wanted to find out whether there was any correlation between the street_suffix such as avenue and street and lane and drive in tandem to the market value. Since there were 22 unique values, I had binary encoded this column.
+
+### Removing Outliers from the numerical columns
+There are many attributes with very large skew, such as the example shown below for the depth column.
+![Depth Before Removing Outliers](report_assets/depth_high_skew.png)
+
+There were very few samples causing such massive skews and outliers, but I wanted to still encode the fact that these outliers were still within the dataset.
+As such, I had clamped the values where the lower bound was the 5th percentile and the upper bound was the 95th percentile.
+Afterwards, I had applied IQR onto the capped version of this column. This technique is called winsorsizing, and I had made a generic function to apply this onto
+any columns for which I noticed had high skews.
+
+The effects of this function on the depth function can be seen below. As you can see, the outliers were removed, but were still retained by imputing them to the upperbounded value.
+![Depth After Winsorsizing](report_assets/depth_capped.png)
+
+The following list of columns were winsorized:
+```
+depth
+frontage
+garage_spaces
+total_area
+total_livable_area
+taxable_building
+taxable_land
+```
+
 # Feature Engineering
