@@ -308,12 +308,12 @@ There are many attributes with very large skew, such as the example shown below 
 
 There were very few samples causing such massive skews and outliers, but I wanted to still encode the fact that these outliers were still within the dataset.
 As such, I had clamped the values where the lower bound was the 5th percentile and the upper bound was the 95th percentile.
-Afterwards, I had applied IQR onto the capped version of this column. This technique is called winsorsizing, and I had made a generic function to apply this onto
+Afterwards, I had applied IQR onto the capped version of this column. This technique is called winsorizing, and I had made a generic function to apply this onto
 any columns for which I noticed had high skews.
 
 The effects of this function on the depth function can be seen below. As you can see, the outliers were removed, but were still retained by imputing them to the upperbounded value.
 
-![Depth After Winsorsizing](report_assets/depth_capped.png)
+![Depth After Winsorizing](report_assets/depth_capped.png)
 
 The following list of columns were winsorized:
 ```
@@ -332,7 +332,7 @@ Market_Value is our target column, but it has quite a wide spread as shown below
 
 ![Market Value Spread/Skew](report_assets/market_value_spread.png)
 
-After applying the winsorsizing function with the larger percentile, you can see the distribution much more cleanly now, and it is much more appropriate to scale.
+After applying the winsorizing function with the larger percentile, you can see the distribution much more cleanly now, and it is much more appropriate to scale.
 ![Market Value Custom Winsorsized](report_assets/market_value_capped.png)
 
 Overall, at this point the data has been cleaned and there are no more categorical variables or missing values or any absurd outliers that remain in the data. Some features have also been engineered with additional values to provide some context in regard to their missing values, and some features were imputed with their average value for missing features. The specifics were mentioned above. At the end of this step, there are two files that are created: `filtered.csv` and `scaled.csv`. The first file is after we've filtered all of the missing values out and engineered/imputed some values for features, and scaled is after we've scaled select numerical columns.
@@ -397,8 +397,64 @@ The score function was set to output as $R^2$. Higher bars represent better perf
 
 ![Naive Approach to using all features in both datasets and scoring them with multiple regression models](report_assets/NaiveModels_Score.png)
 
+Table showcasing R^2 (Scores) from Naive Approach on various regression models. (Higher is better)
+
+| Model               | PCA Dataset Score | High Correlation Dataset Score  |
+|---------------------|-------------------|---------------------------------|
+| Linear Regression   | 0.92631           | 0.96725                         |
+| Decision Tree       | 0.93483           | 0.99433                         |
+| Random Forest       | **0.97200**       | **0.99661**                     |
+| Gradient Boosting   | 0.92996           | 0.99618                         |
+| XGBoost             | 0.96184           | 0.99645                         |
+
+*Bolded represents best performer*
+
+
+The highest scores for each dataset are as follows:
+
+For the PCA Dataset:
+
+- Model: Random Forest
+- Score: 0.971997019932781
+
+For the High Correlation Dataset:
+
+- Model: Random Forest
+- Score: 0.9966130468438323
+
 Furthermore, I had also evaluated the RMSE across both datasets in order to see which dataset had generally produced more accurate predictions. In this graph, lower bars represent more accurate predictions, as it means there was less error.
 
 ![Naive Approach to using all features in both datasets and calculating RMSE with multiple regression models](report_assets/NaiveModels_RMSE.png)
 
-Table showcasing RMSE from Naive Approach on various regression models.
+Table showcasing RMSE from Naive Approach on various regression models. (Lower is better)
+
+| Models (Truncated RMSE to Whole Numbers)   | PCA RMSE       | High Correlation RMSE       |
+|--------------------------------------------|----------------|-----------------------------|
+| Linear Regression                          | 21081          | 14054                       |
+| Decision Tree                              | 19826          | 5848                        |
+| Random Forest                              | **12995**      | **4519**                    |
+| Gradient Boosting                          | 20553          | 4799                        |
+| XGBoost                                    | 15171          | 4625                        |
+
+*Bolded represents best performer*
+
+The lowest RMSEs' for each dataset are as follows:
+
+For the PCA Dataset:
+
+- Model: Random Forest
+- RMSE: 12995
+
+For the High Correlation Dataset:
+
+- Model: Random Forest
+- RMSE: 4519
+
+From my naive approach, I've learned that Random Forest appears to be the best performing algorithm in terms of predicting the market_value with the best accuracy across my models, when applying them with all of the features across my PCA and HighCorrelation dataset.
+
+### Tuning Parameters
+(Continued...)
+
+# Discussion
+
+Overall, I had many challenges trying to determine from the OPA's metadata whether a single attribute was meant to be nominal or ordinal, as there was not a clear descriptor, but rather it had to be interpreted from the language they had used to describe the feature and all possible values that could be within that feature. It was extremely difficult when it came to deciding to drop a column, as I wanted to retain as much information as possible, but I should've been actively calculating the correlation to the market_value and should have done all adjustments necessary to perform that operation as I was cleaning up my datasets and calculating correlations, as I believe this would have led to some meaningful dimensionality reductions earlier on. One of my best strengths was to apply the naive approach onto my model, before trying to tune for hyperparameters, as this saved a lot of computational time when it came to training. Moreover, when it came to cleaning up outliers, I had used a quite rudimentary method known as [winsorizing](https://en.wikipedia.org/wiki/Winsorizing). One of my future directions would be to investiage into better statistical ways in order to retain the overall distribution of the dataset instead of clipping my outliers, as I believe I lost significant information by clipping them and forcing them into a semi-normal distribution. Moreover, I also want to figure out another way to encode categorical variables that is not binary encoded, as I believe my `zip_code_0` binary encoding only has a high correlation, as nearly all zipcodes in philadelphia start with `199xx`, and this had caused a false relationship within my models. This had added many additional columns and features which I did not necessarily require once it came to model development.
