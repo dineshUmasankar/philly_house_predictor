@@ -1,4 +1,10 @@
 # %%
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from category_encoders import BinaryEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
 def drop_high_missing_percent_columns(df):
@@ -158,10 +164,6 @@ def filter_specific(df):
 df_filter_specific = filter_specific(df_filter_saledate.copy())
 
 # %%
-from sklearn.preprocessing import OrdinalEncoder
-from sklearn.preprocessing import OneHotEncoder
-from category_encoders import BinaryEncoder
-
 df_encode = df_filter_specific.copy()
 # Basement Ordinal Encoding
 valid_basements = ['0', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
@@ -291,10 +293,6 @@ df_remove_outliers.to_csv('filtered.csv')
 df_remove_outliers
 
 # %%
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
-
 # Identify columns to scale
 columns_to_scale = ['fireplaces', 'number_of_bathrooms', 'number_of_bedrooms', 'number_stories',
            'basements_encoded', 'exterior_encoded', 'interior_encoded',
@@ -325,5 +323,3 @@ pipeline = Pipeline([
 
 scaled_dataset = pd.DataFrame(pipeline.fit_transform(df_remove_outliers), columns=scaled_cols)
 scaled_dataset.to_csv('scaled.csv')
-
-

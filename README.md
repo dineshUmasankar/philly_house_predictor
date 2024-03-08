@@ -453,7 +453,7 @@ For the High Correlation Dataset:
 From my naive approach, I've learned that Random Forest appears to be the best performing algorithm in terms of predicting the market_value with the best accuracy across my models, when applying them with all of the features across my PCA and HighCorrelation dataset.
 
 ### Tuning Parameters
-(Continued...)
+I had tried tuning the various features by testing all possible combinations of the features (for both PCA and Highly Correlated Features). I created all possible combinations and tested a few outcomes, as creating random_forest models seem to take ~10 minutes per combination with my current setup. As such, for now, I have not seen a model generation that performed better than using all of the features across both datasets (Highly Correlated and all 10 principal components). Therefore, I would add this as a future investigation direction for the project, to test all possible combinations and compare the performance of PCA & Highly Correlated features. I would also add to test all possible combinations across all the models, but due to compute limitations, I had went forward with my naive approach to test only Random Forest, as it performed noticeably better than the rest of the models, however XGBoost would be an interesting conteder to explore.
 
 # Discussion
 
@@ -466,3 +466,5 @@ Cleaning outliers using winsorizing, while effective, raised concerns about losi
 Surprisingly high correlations between taxable_land and taxable_building in predicting market_value prompted consideration of multicollinearity. The plan for future analysis involves testing these variables to ensure model robustness, particularly given suspicions of overfitting that may have been mitigated in the naive approach by weaker correlated features.
 
 In conclusion, this project offered valuable insights into data handling challenges, the importance of feature engineering decisions, and the significance of comprehensive testing and validation methods. Recommendations for future research involve refining encoding strategies, exploring advanced outlier handling techniques, and conducting further tests on potential multicollinearity to enhance the model's predictive performance.
+
+**P.S.** This project refers to many csv locations which have to be read, and I would reccomend for those trying to recreate this project to change any invocations of `pd.read_csv` to the appropriate location on your local machine.

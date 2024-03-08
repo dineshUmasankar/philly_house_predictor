@@ -1,4 +1,5 @@
 # %%
+from sklearn.decomposition import PCA
 import pandas as pd
 
 df = pd.read_csv('scaled.csv')
@@ -19,8 +20,6 @@ selected_features = df[['number_stories', 'depth_capped', 'exempt_building_encod
 selected_features.to_csv('high_correlations.csv')
 
 # %%
-from sklearn.decomposition import PCA
-
 # The dataset is already scaled so we can apply PCA
 
 target_variable = df['market_value_capped']
@@ -33,5 +32,3 @@ sum(pca.explained_variance_ratio_)
 pca_df = pd.DataFrame(pca_all, columns=['PCA_1', 'PCA_2', 'PCA_3', 'PCA_4', 'PCA_5', 'PCA_6', 'PCA_7', 'PCA_8', 'PCA_9', 'PCA_10'])
 pca_df = pca_df.join(target_variable)
 pca_df.to_csv('pca_10component.csv')
-
-
